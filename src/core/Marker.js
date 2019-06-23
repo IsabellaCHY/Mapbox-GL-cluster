@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl'
 export default class Marker extends mapboxgl.Marker {
   constructor(opts) {
     let el = document.createElement('div')
-    let offset = opts.offset || [-10, -34]
+    let offset = opts.offset || [-10, -10]
     let draggable = opts.draggable || false
     opts = Object.assign({
       element: el,
@@ -11,12 +11,14 @@ export default class Marker extends mapboxgl.Marker {
       draggable: draggable
     }, opts)
     super(opts)
-    this.el = el
     this.opts = opts
+    this.el = el
+    this.el.className += ` ${this.opts.className}` || ' ext-maker'
     this.map = opts.map
     this.icon = opts.icon
     this.position = opts.position
-    console.log(this)
+    this.label = opts.label
+    this.labelDiv = null
     if (this.position) {
       this.setLngLat(this.position)
     }
@@ -36,14 +38,29 @@ export default class Marker extends mapboxgl.Marker {
       this.el.appendChild(img)
     }
     if (this.label) {
-      let label = document.createElement('div')
-      if (this.label.className) {
-        label.className = this.label.className
-      }
-      label.innerHTML = this.label.content
-      this.el.appendChild(label)
+      this.labelDiv = this.makeLabelDiv(this.label)
+      this.el.appendChild(this.labelDiv)
     }
-    this.el = document.createElement('div')
-    this.el.className = this.opts.className || 'ext-maker'
+  }
+
+  checkHtml(str) {
+    let reg = /<[^>]+>/g
+    return reg.test(str)
+  }
+
+  makeLabelDiv(label) {
+    let method = this.checkHtml(label.content) ? 'innerHTML' : 'innerText'
+    let labelDiv = document.createElement('div')
+    labelDiv.className = this.label.className || 'ext-marker-label'
+    labelDiv.innerHTML = this.label.content
+    labelDiv.style.position = 'absolute'
+    labelDiv.style.width = label.width
+    labelDiv.style.height = label.height
+    if (label.offset) {
+      labelDiv.style.left = label.offset[0] + 'px'
+      labelDiv.style.top = label.offset[1] + 'px'
+    }
+    labelDiv[method] = label.content
+    return labelDiv
   }
 }
