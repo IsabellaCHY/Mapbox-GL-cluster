@@ -89,44 +89,48 @@ export default {
           "text-color": ["case", ["<", ["get", "mag"], 3], "black", "white"]
         }
       });
-      // let marker = new Marker({
-      //   map: this.map,
-      //   position: [114.09, 22.54],
-      //   icon: {
-      //     src: require("../assets/logo.png"),
-      //     size: {
-      //       width: "20px",
-      //       height: "20px"
-      //     }
-      //   }
-      // });
-      setTimeout(() => {
-        this.map.on(
-          "data",
-          e => {
-            if (e.sourceId !== "earthquakes" || !e.isSourceLoaded) return;
-            console.log(e);
-            // this.map.on("move", this.updateMarkers);
-            // this.map.on("moveend", this.updateMarkers);
-            this.updateMarkers();
-          },
-          5000
-        );
+      let marker = new Marker({
+        map: this.map,
+        position: [113.7384375000031, 22.965517389903113],
+        icon: {
+          src: require("../assets/cluster01.png"),
+          size: {
+            width: "53px",
+            height: "53px"
+          }
+        },
+        label: {
+          content: `
+                 <div>99 hegksg ds gkjsng</div>
+                 `
+        }
+      });
+      this.map.on("click", e => {
+        console.log(e);
+      });
+      this.map.on("data", e => {
+        if (e.sourceId !== "earthquakes" || !e.isSourceLoaded) return;
+        this.map.on("move", this.updateMarkers);
+        this.map.on("moveend", this.updateMarkers);
+        this.updateMarkers();
       });
     });
   },
   methods: {
     updateMarkers() {
+      // if (this.markers.length > 0) {
+      //   this.markers.map(item => {
+      //     item.remove();
+      //   });
+      // }
       var newMarkers = {};
       var features = this.map.querySourceFeatures("earthquakes");
+      console.log(features);
       if (features.length === 0) {
         return;
       }
-      console.log(features);
       for (var i = 0; i < 1; i++) {
         var coords = features[i].geometry.coordinates;
-        console.log(coords);
-
         if (!coords) {
           continue;
         }
@@ -134,21 +138,26 @@ export default {
         if (!props.cluster) continue;
         var id = props.cluster_id;
         var marker = this.markers[id];
+        let mag = features[i].properties.point_count;
+        console.log(mag);
         if (!marker) {
           marker = this.markers[id] = new Marker({
             position: coords,
             map: this.map,
             offset: [0, 0],
+            icon: {
+              src: require("../assets/cluster01.png"),
+              size: {
+                width: "53px",
+                height: "53px"
+              }
+            },
             label: {
-              content: `
-                 <div>99 hegksg ds gkjsng</div>
-                 `
+              content: `<div>${mag}</div>`
             }
           });
-          console.log(marker);
         }
         newMarkers[id] = marker;
-        console.log(marker);
       }
     }
   }
