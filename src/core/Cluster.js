@@ -7,7 +7,7 @@ export default class Cluster {
     this.init()
   }
 
-  init () {
+  init() {
     if (!this.map) { return }
     this.map.addSource("earthquakes", {
       type: "geojson",
@@ -32,15 +32,7 @@ export default class Cluster {
           750,
           "#f28cb1"
         ],
-        "circle-radius": [
-          "step",
-          ["get", "point_count"],
-          20,
-          100,
-          30,
-          750,
-          40
-        ]
+        "circle-radius": 10
       }
     });
 
@@ -70,7 +62,7 @@ export default class Cluster {
     });
 
     this.map.on('click', 'clusters', (e) => {
-      var features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+      var features = this.map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
       var clusterId = features[0].properties.cluster_id;
       this.map.getSource('earthquakes').getClusterExpansionZoom(clusterId, function (err, zoom) {
         if (err)
@@ -82,56 +74,57 @@ export default class Cluster {
         });
       });
     });
+    this.updateMarkers()
     this.map.on("data", e => {
       if (e.sourceId !== "earthquakes" || !e.isSourceLoaded) return;
-      // this.map.on("move", _this.updateMarkers);
-      this.map.on("moveend", this.updateMarkers);
-      this.map.on("zoomend", this.updateMarkers);
-      // this.map.on("moveend", _this.updateMarkers);
-      // this.updateMarkers();
+      this.map.on("moveend", this._updateMarkers);
+      this.map.on("zoomend", this._updateMarkers);
+      this._updateMarkers();
     });
   }
 
-  updateMarkers () {
-    console.log(9999)
-    var newMarkers = {};
-    if (!this.map) { return }
-    var features = this.map.querySourceFeatures("earthquakes")
-    console.log(features)
-    if (features.length === 0) {
-      return;
-    }
-    for (var i = 0; i < features.length; i++) {
-      var coords = features[i].geometry.coordinates;
-      if (!coords) {
-        continue;
+  updateMarkers() {
+    this._updateMarkers = (e) => {
+      if (!this.map) { return }
+      var features = this.map.querySourceFeatures("earthquakes")
+      if (features.length === 0) {
+        return;
       }
-      var props = features[i].properties;
-      if (!props.cluster) continue;
-      console.log(features[i])
-      var id = props.cluster_id;
-      var marker = this.markers[id];
+      this.markers.map(item => {
+        item.remove()
+      })
+      this.markers = []
+      for (var i = 0; i < features.length; i++) {
+        var coords = features[i].geometry.coordinates;
+        if (!coords) {
+          continue;
+        }
+        var props = features[i].properties;
+        if (!props.cluster) continue;
+        var id = props.cluster_id;
+        var marker = this.markers[id];
 
-      let mag = features[i].properties.mag;
-      if (!mag) { continue }
-      if (!marker) {
-        marker = this.markers[id] = new Marker({
-          position: coords,
-          map: this.map,
-          offset: [0, 0],
-          icon: {
-            src: require("../assets/cluster01.png"),
-            size: {
-              width: "53px",
-              height: "53px"
+        let mag = features[i].properties.point_count;
+        if (mag <= 10) { continue }
+        if (!marker) {
+          marker = this.markers[id] = new Marker({
+            position: coords,
+            map: this.map,
+            offset: [0, 0],
+            icon: {
+              src: require("../assets/cluster01.png"),
+              size: {
+                width: "53px",
+                height: "53px"
+              }
+            },
+            label: {
+              offset: [18, 18],
+              content: `<div style="font-size:14px" >${mag}</div>`
             }
-          },
-          label: {
-            content: `<div>${mag}</div>`
-          }
-        });
+          });
+        }
       }
-      newMarkers[id] = marker;
     }
   }
 }

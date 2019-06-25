@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl'
 export default class Marker extends mapboxgl.Marker {
   constructor(opts) {
     let el = document.createElement('div')
-    let offset = opts.offset || [-10, -10]
+    let offset = opts.offset || [-10, q]
     let draggable = opts.draggable || false
     opts = Object.assign({
       element: el,
@@ -62,5 +62,9 @@ export default class Marker extends mapboxgl.Marker {
     }
     labelDiv[method] = label.content
     return labelDiv
+  }
+
+  remove() {
+    super.remove()
   }
 }
