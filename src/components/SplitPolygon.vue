@@ -4,11 +4,8 @@
 
 <script>
 import mapboxgl from "mapbox-gl";
-import amapRasterStyle from "../core/AmapStyle";
-import Marker from "../core/Marker";
-import Cluster from "../core/Cluster";
 export default {
-  name: "Cluster",
+  name: "SplitPolygon",
   data() {
     return {
       map: null,
@@ -23,12 +20,6 @@ export default {
       style: "mapbox://styles/mapbox/streets-v9",
       center: [114.09, 22.54],
       zoom: 4
-    });
-
-    this.map.on("load", () => {
-      let cluster = new Cluster({
-        map: this.map
-      });
     });
   },
   methods: {}

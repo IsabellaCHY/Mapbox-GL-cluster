@@ -8,15 +8,9 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/Amap',
-      name: 'Amap',
-      component: Amap
-    }
-    ,
-    {
-      path: '/Cluster',
-      name: 'Cluster',
-      component: Cluster
+      path: '/',
+      name: 'SplitPolygon',
+      component: SplitPolygon
     }
   ]
 })
